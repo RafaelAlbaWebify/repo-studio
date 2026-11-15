@@ -1,4 +1,4 @@
-import json, pathlib, subprocess, tempfile, unittest, sys
+import json, os, pathlib, subprocess, tempfile, unittest, sys
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]))
 import studio
 
@@ -13,7 +13,7 @@ class StudioTests(unittest.TestCase):
   (self.repo/'link').symlink_to('/etc/passwd')
   git('add','.',cwd=self.repo);git('commit','-qm','initial',cwd=self.repo)
  def test_git_and_sources(self):
-  self.assertEqual(studio.git_root(self.repo),self.repo)
+  self.assertTrue(os.path.samefile(studio.git_root(self.repo),self.repo))
   self.assertIn('main.py',studio.entries(self.repo))
   self.assertIn('return "ok"',studio.file_at(self.repo,'main.py'))
   with self.assertRaises(ValueError):studio.file_at(self.repo,'../etc/passwd')
