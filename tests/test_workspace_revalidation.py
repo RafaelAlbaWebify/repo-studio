@@ -1,6 +1,7 @@
 """Regression: commit changes do not silently carry human decisions."""
 import pathlib
 import sqlite3
+from contextlib import closing
 import subprocess
 import tempfile
 import unittest
@@ -54,11 +55,11 @@ class WorkspaceRevalidationTests(unittest.TestCase):
     def test_legacy_database_migrated_without_loss(self):
         with tempfile.TemporaryDirectory() as temp:
             data=pathlib.Path(temp);path=data/'investigation-workspace.sqlite3'
-            with sqlite3.connect(path) as db:
+            with closing(sqlite3.connect(path)) as db, db:
                 db.execute('''CREATE TABLE investigations (key TEXT PRIMARY KEY,repo TEXT NOT NULL,commit_sha TEXT NOT NULL,finding_type TEXT NOT NULL,finding_id TEXT NOT NULL,progress TEXT NOT NULL,decision TEXT NOT NULL,notes TEXT NOT NULL,updated_at TEXT NOT NULL)''')
                 db.execute("INSERT INTO investigations VALUES ('k','/r','c','cycle','i','reviewed','keep','legacy note','now')")
             ws=Workspace(data)
-            with sqlite3.connect(path) as db:
+            with closing(sqlite3.connect(path)) as db:
                 row=db.execute("SELECT notes,source_paths FROM investigations WHERE key='k'").fetchone()
                 self.assertEqual(row,('legacy note',None))
 
