@@ -1,0 +1,93 @@
+name: Repo Studio checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Python unit tests
+        run: python -B -m unittest discover -s tests -v
+      - name: Clean Linux portable installation (empty HOME)
+        run: python -B tools/clean_install_smoke.py
+      - name: Python HTTP/SQLite smoke
+        run: python -B tests/smoke_workspace_http.py
+      - name: JavaScript syntax
+        run: |
+          for file in static/*.js; do node --check "$file"; done
+      - name: Benchmark template contract
+        run: python -B benchmark/measure.py benchmark/results.csv
+  browser-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Playwright Chromium
+        run: |
+          python -m pip install 'playwright>=1.45,<2'
+          python -m playwright install --with-deps chromium
+      - name: Workspace E2E — synthetic Git fixture
+        run: python -B e2e/workspace_acceptance.py --output ./workspace-e2e-results
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace-e2e-results
+          path: ./workspace-e2e-results/
+          retention-days: 7
+
+  unit-windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Windows unit and config tests
+        run: python -B -m unittest discover -s tests -v
+      - name: Fresh Windows portable installation
+        run: python -B tools/clean_install_smoke.py
+      - name: Windows HTTP/SQLite smoke
+        run: python -B tests/smoke_workspace_http.py
+      - name: JavaScript syntax on Windows
+        shell: pwsh
+        run: |
+          Get-ChildItem static\*.js | ForEach-Object { node --check $_.FullName; if ($LASTEXITCODE -ne 0) { exit 1 } }
+      - name: Native Windows install, update, backup and rollback
+        run: python -B tools/windows_installer_smoke.py
+      - name: Parse Windows installer PowerShell
+        shell: pwsh
+        run: |
+          $tokens = $null; $parseErrors = $null
+          $null = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'install_windows.ps1'), [ref]$tokens, [ref]$parseErrors)
+          if ($parseErrors.Count -gt 0) { $parseErrors | Out-String | Write-Error; exit 1 }
+      - name: Install Playwright for Windows
+        run: |
+          python -m pip install 'playwright>=1.45,<2'
+          python -m playwright install chromium
+      - name: Workspace Chromium E2E on Windows
+        run: python -B e2e/workspace_acceptance.py --output ./windows-workspace-e2e-results
+      - name: Upload Windows test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-workspace-e2e-results
+          path: ./windows-workspace-e2e-results/
+          retention-days: 7
