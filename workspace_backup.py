@@ -1,5 +1,6 @@
 """Safe, offline-compatible backup of a Repo Studio Workspace database."""
 import argparse
+from contextlib import closing
 import pathlib
 import sqlite3
 import sys
@@ -16,12 +17,13 @@ def backup_workspace(data_dir, destination):
     if target.parent == source.parent and target.name == source.name:
         raise ValueError('Backup destination must differ from source')
     try:
-        with sqlite3.connect(f'file:{source}?mode=ro', uri=True, timeout=10) as live:
-            with sqlite3.connect(target, timeout=10) as snapshot:
-                live.backup(snapshot)
-                check = snapshot.execute('PRAGMA integrity_check').fetchone()[0]
-                if check != 'ok':
-                    raise RuntimeError(f'Backup integrity check failed: {check}')
+        with closing(sqlite3.connect(f'file:{source}?mode=ro', uri=True, timeout=10)) as live:
+            with closing(sqlite3.connect(target, timeout=10)) as snapshot:
+                with snapshot:
+                    live.backup(snapshot)
+                    check = snapshot.execute('PRAGMA integrity_check').fetchone()[0]
+                    if check != 'ok':
+                        raise RuntimeError(f'Backup integrity check failed: {check}')
     except BaseException:
         target.unlink(missing_ok=True)
         raise
