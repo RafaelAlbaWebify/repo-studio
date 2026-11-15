@@ -15,7 +15,7 @@ class LauncherConfigTest(unittest.TestCase):
             repo = home / 'example-repo'
             repo.mkdir()
             config.write_text(json.dumps({'repo': str(repo), 'jscpd_bin': '/opt/tools/jscpd'}))
-            with patch.dict(os.environ, {'XDG_CONFIG_HOME': str(home), 'PORT': '8765'}, clear=True):
+            with patch.dict(os.environ, {'XDG_CONFIG_HOME': str(home), 'APPDATA': str(home), 'PORT': '8765'}, clear=True):
                 args = arguments([])
             self.assertEqual(args[:2], ['--repo', str(repo)])
             self.assertIn('--jscpd-bin', args)
@@ -24,7 +24,7 @@ class LauncherConfigTest(unittest.TestCase):
     def test_missing_config_reports_error_without_modification(self):
         from launcher import arguments
         with tempfile.TemporaryDirectory() as temp:
-            with patch.dict(os.environ, {'XDG_CONFIG_HOME': temp}, clear=True):
+            with patch.dict(os.environ, {'XDG_CONFIG_HOME': temp, 'APPDATA': temp}, clear=True):
                 with self.assertRaises(ValueError):
                     arguments([])
             self.assertFalse((Path(temp) / 'repo-studio').exists())
