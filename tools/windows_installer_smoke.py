@@ -51,7 +51,7 @@ def main():
         config = Path(env['APPDATA']) / 'repo-studio' / 'launch.json'
         invoke(script, env, '-Repository', repo)
         assert (base / 'studio.py').is_file()
-        assert Path(json.loads(config.read_text(encoding='utf-8'))['repo']) == repo
+        assert os.path.samefile(json.loads(config.read_text(encoding='utf-8'))['repo'], repo)
         assert not backup.exists(), 'Fresh install must not create a previous-release backup'
         # Simulate an older installed code release. Updating should back this up.
         (base / 'previous_marker.txt').write_text('original-code', encoding='utf-8')
@@ -64,19 +64,19 @@ def main():
         invoke(script, fault_env, '-Repository', repo, expect_ok=False)
         assert (base / 'previous_marker.txt').read_text(encoding='utf-8') == 'original-code'
         assert not backup.exists(), 'Failed update consumed the rollback slot'
-        assert Path(json.loads(config.read_text(encoding='utf-8'))['repo']) == repo
+        assert os.path.samefile(json.loads(config.read_text(encoding='utf-8'))['repo'], repo)
         assert (data / 'user_state.txt').read_text(encoding='utf-8') == 'preserve'
         invoke(script, env)  # Upgrade, keeping launch.json.
         assert not (base / 'previous_marker.txt').exists()
         assert (backup / 'previous_marker.txt').read_text(encoding='utf-8') == 'original-code'
         assert (data / 'user_state.txt').read_text(encoding='utf-8') == 'preserve'
-        assert Path(json.loads(config.read_text(encoding='utf-8'))['repo']) == repo
+        assert os.path.samefile(json.loads(config.read_text(encoding='utf-8'))['repo'], repo)
         invoke(script, env, expect_ok=False)  # Existing rollback backup must block upgrades.
         assert (backup / 'previous_marker.txt').is_file()
         invoke(script, env, '-Rollback')
         assert (base / 'previous_marker.txt').read_text(encoding='utf-8') == 'original-code'
         assert (data / 'user_state.txt').read_text(encoding='utf-8') == 'preserve'
-        assert Path(json.loads(config.read_text(encoding='utf-8'))['repo']) == repo
+        assert os.path.samefile(json.loads(config.read_text(encoding='utf-8'))['repo'], repo)
         print('WINDOWS_INSTALL_UPDATE_ROLLBACK_PASS (native Windows isolated profile)')
 
 
