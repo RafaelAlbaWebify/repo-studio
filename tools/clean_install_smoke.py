@@ -78,16 +78,24 @@ def main():
             proc.terminate(); proc.wait(timeout=5)
             raise RuntimeError('Timed out launching clean installation: ' + log.read_text()[-1500:])
         def stop(proc):
-            proc.terminate()
-            try: proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                proc.kill(); proc.wait(timeout=5)
+            if os.name == 'nt':
+                # launcher.py delegates to studio.py on Windows: stop both.
+                subprocess.run(['taskkill', '/PID', str(proc.pid), '/T', '/F'],
+                               capture_output=True, timeout=10, check=False)
+                try: proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill(); proc.wait(timeout=5)
+            else:
+                proc.terminate()
+                try: proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill(); proc.wait(timeout=5)
         proc = None
         try:
             proc, status = start()
-            assert status['repository'] == str(repo), status
+            assert os.path.samefile(status['repository'], repo), status
             assert status['jscpdAvailable'] is False and status['repowiseAvailable'] is False
-            assert (Path(status['dataPath']).is_relative_to(home)), status
+            assert Path(status['dataPath']).resolve().is_relative_to(home.resolve()), status
             assert 'Repo Studio' in urllib.request.urlopen(url, timeout=2).read().decode()
             assert get_json(url + '/api/workspace/history')['total'] == 0
             state = Path(status['dataPath'])
@@ -96,7 +104,7 @@ def main():
             assert hash_tree(repo) == before, 'Fixture source modified by application'
             assert git(repo, 'status', '--porcelain') == '', 'Fixture git status changed'
             proc, status2 = start()
-            assert status2['repository'] == str(repo)
+            assert os.path.samefile(status2['repository'], repo)
             assert get_json(url + '/api/workspace/history')['total'] == 0
             assert hash_tree(repo) == before
             print('CLEAN_PORTABLE_INSTALL_PASS', os.name)
