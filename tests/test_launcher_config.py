@@ -17,7 +17,8 @@ class LauncherConfigTest(unittest.TestCase):
             config.write_text(json.dumps({'repo': str(repo), 'jscpd_bin': '/opt/tools/jscpd'}))
             with patch.dict(os.environ, {'XDG_CONFIG_HOME': str(home), 'APPDATA': str(home), 'PORT': '8765'}, clear=True):
                 args = arguments([])
-            self.assertEqual(args[:2], ['--repo', str(repo)])
+            self.assertEqual(args[0], '--repo')
+            self.assertTrue(os.path.samefile(args[1], repo))
             self.assertIn('--jscpd-bin', args)
             self.assertEqual(args[-2:], ['--port', '8765'])
 
