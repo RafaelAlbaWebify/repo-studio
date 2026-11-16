@@ -59,7 +59,7 @@ async function inspectInsightEvidence(){
   const coverage=result.json?.evidenceCoverage||{},root=$('#insightsCoverage');root.replaceChildren();
   const complete=Number(coverage.completeAnchors||0),required=Number(coverage.requestedAnchors||0),ok=!!coverage.anchorsComplete;
   const header=el('div','','insights-coverage-row');header.append(el('strong',ok?'Source anchors complete':'Evidence incomplete'),el('strong',`${complete}/${required} complete anchors`));root.append(header);
-  const track=el('div','','insights-track');const fill=el('span');fill.style.width=required?`${Math.min(100,100*complete/required)}%`:'0%';track.append(fill);root.append(track);
+  const track=el('div','','insights-track');const fill=el('span');rsStyle(fill,'width',required?`${Math.min(100,100*complete/required)}%`:'0%');track.append(fill);root.append(track);
   if(kind==='cycle')root.append(el('div',`${coverage.edgesWithCompleteSource??0}/${coverage.reportedEdges??0} reported edges have complete source excerpts; ${coverage.edgesWithLocatedImports??0} located imports.`,'insights-caution'));
   root.append(el('div',`${coverage.missingOrPartialAnchors??0} missing/partial anchors · ${coverage.missingEvidenceItems??0} missing evidence items · ${level} context`,'insights-caution'));
   for(const miss of (result.json?.missingEvidence||[]).slice(0,6))root.append(el('div',`${miss.path||'Unknown source'}: ${miss.problem||miss.reason||'not available'}`,'insights-caution'));

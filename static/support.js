@@ -6,7 +6,29 @@ for(const item of document.querySelectorAll('.nav')){const key=item.dataset.page
 for(const [id,description] of Object.entries(fixedHelp)){const node=document.getElementById(id);if(node&&!node.dataset.help)node.dataset.help=description;}
 const tip=document.getElementById('hoverHelp');let timer=null,current=null;
 function closeTip(){clearTimeout(timer);timer=null;current=null;tip.classList.add('hidden');}
-function openTip(target){const explanation=target?.dataset?.help;if(!explanation)return;tip.textContent=explanation;const r=target.getBoundingClientRect();const width=Math.min(330,window.innerWidth-24);tip.style.maxWidth=width+'px';tip.style.left=Math.max(12,Math.min(r.left,window.innerWidth-width-12))+'px';tip.style.top=(r.bottom+10)+'px';tip.classList.remove('hidden');const rect=tip.getBoundingClientRect();if(rect.bottom>window.innerHeight-10)tip.style.top=Math.max(12,r.top-rect.height-10)+'px';}
+/* RS_QA_CSP_TOOLTIP_V1: bounded CSSOM positioning; no inline style attributes. */
+const rsTipPosition=(()=>{
+ const sheet=[...document.styleSheets].find(s=>s.href&&new URL(s.href).pathname==='/style.css');
+ if(!sheet)throw Error('Local stylesheet unavailable for tooltip');
+ const index=sheet.insertRule('#hoverHelp{max-width:330px;left:12px;top:12px}',sheet.cssRules.length);
+ const rule=sheet.cssRules[index];
+ return (left,top,width)=>{
+  for(const v of [left,top,width])if(!Number.isFinite(v)||v<0||v>10000)throw Error('Invalid tooltip geometry');
+  rule.style.setProperty('max-width',width+'px');
+  rule.style.setProperty('left',left+'px');
+  rule.style.setProperty('top',top+'px');
+ };
+})();
+function openTip(target){
+ const explanation=target?.dataset?.help;if(!explanation)return;
+ tip.textContent=explanation;
+ const r=target.getBoundingClientRect(),width=Math.min(330,window.innerWidth-24);
+ const left=Math.max(12,Math.min(r.left,window.innerWidth-width-12));
+ rsTipPosition(left,r.bottom+10,width);
+ tip.classList.remove('hidden');
+ const rect=tip.getBoundingClientRect();
+ if(rect.bottom>window.innerHeight-10)rsTipPosition(left,Math.max(12,r.top-rect.height-10),width);
+}
 document.addEventListener('pointerover',e=>{const t=e.target.closest('[data-help]');if(!t||current===t)return;closeTip();current=t;timer=setTimeout(()=>{if(current===t)openTip(t);},650);});
 document.addEventListener('pointerout',e=>{const t=e.target.closest('[data-help]');if(t&&t===current&&!t.contains(e.relatedTarget))closeTip();});
 document.addEventListener('focusin',e=>{const t=e.target.closest('[data-help]');if(t){closeTip();current=t;openTip(t);}});

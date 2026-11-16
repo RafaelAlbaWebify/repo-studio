@@ -346,3 +346,112 @@ body:has(#overview:not(.hidden)) .content{width:100%;max-width:none;padding:12px
 .workspace-ledger-entry .quiet{font-size:.88em}
 .workspace-ledger-entry p{margin:5px 0;white-space:pre-wrap}
 .workspace-ledger-entry button{margin-top:5px}
+/* RS_SOURCE_VIEW_V1 — only the repository file explorer. */
+main:has(#files.page:not(.hidden)) { min-width:0; }
+main:has(#files.page:not(.hidden)) > .content {
+  width:100%; max-width:none; min-width:0;
+  padding-left:clamp(14px,2.5vw,40px);
+  padding-right:clamp(14px,2.5vw,40px);
+}
+#files, #files .twoCols, #files .treePane, #files .codePane {min-width:0;max-width:100%}
+#files .twoCols{width:100%;grid-template-columns:clamp(210px,21vw,310px) minmax(0,1fr);gap:12px;align-items:stretch}
+#files .treePane,#files .codePane{overflow:hidden}
+#files .treePane{display:flex;flex-direction:column}
+#files .fileList{overflow-y:auto;overflow-x:hidden;max-height:min(72vh,800px);scrollbar-gutter:stable}
+#files .fileTitle{min-width:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#files #fileTitle{flex:1 1 170px;min-width:0;overflow-wrap:anywhere}
+#files .fileTools{flex:0 1 auto;min-width:0;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#files .rs-source-controls{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap}
+#files .rs-source-controls button{background:#262838;border:1px solid #46435c;color:#dad6ff;padding:5px 9px;border-radius:6px;font-size:12px;line-height:1.4}
+#files .rs-source-controls button:hover{background:#383650}
+#files .rs-source-controls button:focus-visible{outline:2px solid #aaa0ff;outline-offset:2px}
+#files .rs-source-controls button[aria-pressed="true"]{background:#413966;border-color:#9286db}
+#files .rs-source-controls button:disabled{opacity:.45}
+#files .sourceScroll{width:100%;max-width:100%;min-width:0;max-height:min(72vh,800px);overflow-x:scroll;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable both-edges;scrollbar-width:auto;scrollbar-color:#77738e #171923}
+#files .sourceScroll::-webkit-scrollbar{width:12px;height:13px;background:#171923}
+#files .sourceScroll::-webkit-scrollbar-thumb{background:#77738e;border:2px solid #171923;border-radius:7px}
+#files .sourceScroll::-webkit-scrollbar-corner{background:#171923}
+#files .sourceLines{width:max-content;min-width:100%;padding-bottom:4px}
+#files .sourceLine{grid-template-columns:60px max-content;width:max-content;min-width:100%;white-space:pre}
+#files .lineText{min-width:0;white-space:pre;tab-size:4}
+#files .lineNo{position:sticky;left:0;background:#101217;z-index:1}
+#files .sourceLine.is-target .lineNo{background:#363049}
+#files .sourceScroll.rs-wrap{overflow-x:auto}
+#files .sourceScroll.rs-wrap .sourceLines{width:100%;min-width:0}
+#files .sourceScroll.rs-wrap .sourceLine{width:100%;grid-template-columns:60px minmax(0,1fr);white-space:pre-wrap}
+#files .sourceScroll.rs-wrap .lineText{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+@media(max-width:850px){
+  #files .twoCols{grid-template-columns:minmax(0,1fr)}
+  #files .fileList{max-height:220px}
+  #files .sourceScroll{max-height:65vh}
+}
+
+/* RS_PROFESSIONAL_WORKFLOW_V1: isolated investigation dialog */
+.rs-professional-dialog{position:fixed;inset:0;z-index:200;background:#080911ce;display:grid;place-items:center;padding:16px}
+.rs-professional-dialog.hidden{display:none}
+.rs-professional-body{width:min(960px,100%);max-height:94vh;overflow:auto;background:#191b24;color:#e9e9f1;border:1px solid #52516d;border-radius:12px;padding:20px;box-shadow:0 18px 55px #0009}
+.rs-professional-heading{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.rs-professional-controls,.rs-professional-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:14px 0}
+.rs-professional-controls label{color:#aeb1c5;font-size:12px}
+#rsProNotes,#rsProPreview{display:block;width:100%;min-width:0;resize:vertical;border:1px solid #474a5d;background:#101218;color:#dfe2ee;border-radius:7px;padding:12px;font:12px/1.55 ui-monospace,monospace}
+#rsProPreview{height:min(46vh,460px);white-space:pre;overflow:auto;scrollbar-color:#8586a8 #191b24}
+@media(max-width:700px){.rs-professional-body{padding:12px}.rs-professional-controls{align-items:flex-start}}
+/* RS_RESPONSIVE_OVERVIEW_P0C_V1
+   Grid/flex min-size corrections and mobile reflow; do not clip document content. */
+.layout > main, .layout .content, .layout .page { min-width:0; }
+@media (max-width:700px) {
+  .layout { grid-template-columns:65px minmax(0,1fr); }
+  .layout > main { min-width:0; max-width:100%; }
+  header { min-width:0; padding:0 10px; gap:6px; }
+  header .crumb, header .right { min-width:0; }
+  header .crumb { overflow-wrap:anywhere; }
+  header .right { gap:6px; flex-shrink:1; }
+  .content, body:has(#overview:not(.hidden)) .content {
+    width:100%; max-width:100%; min-width:0; padding:16px 10px;
+  }
+  #overview, #overview .overview-shell, #overview .overview-command-bar,
+  #overview .overview-repo-block, #overview .overview-meta-grid,
+  #overview .overview-meta-item, #overview .overview-actions,
+  #overview .dashboard-compact, #overview .dashboard-charts,
+  #overview .dashboard-top-grid, #overview .dashboard-bottom-grid,
+  #overview .dashboard-panel, #overview .dashboard-stat,
+  #overview .dashboard-compact .dashboard-metrics,
+  #overview .dashboard-tool-states, #overview .dash-distribution-wrap,
+  #overview .dash-priority, #overview .overview-details,
+  #overview .overview-details-grid, #overview .compact-metric-grid {
+    min-width:0; max-width:100%;
+  }
+  #overview .overview-command-bar,
+  #overview .overview-meta-grid, #overview .dashboard-charts,
+  #overview .dashboard-top-grid, #overview .dashboard-bottom-grid,
+  #overview .dashboard-compact .dashboard-metrics,
+  #overview .dashboard-tool-states,
+  #overview .dash-distribution-wrap,
+  #overview .compact-metric-grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+  #overview .overview-command-bar { padding:12px; gap:10px; }
+  #overview .overview-meta-grid { gap:7px; }
+  #overview .overview-meta-item strong, #overview .overview-meta-item code,
+  #overview .dashboard-stat strong { overflow-wrap:anywhere; min-width:0; }
+  #overview .overview-actions { grid-column:auto; flex-wrap:wrap; justify-content:flex-start; }
+  #overview .overview-actions button { max-width:100%; white-space:normal; }
+  #overview .overview-repo-line, #overview .dashboard-panel-title,
+  #overview .dash-queue-item, #overview .dash-hotspot-row {
+    min-width:0; flex-wrap:wrap;
+  }
+  #overview .dash-distribution-wrap { justify-items:start; }
+  #overview .dashboard-panel-title .quiet { white-space:normal; overflow-wrap:anywhere; }
+  #overview .overview-details-grid { min-width:0; }
+  #overview .repo-path { overflow-wrap:anywhere; }
+}
+
+/* RS_QA_CSP_STATIC_V1 */
+.rs-triage-panel{padding:16px;margin:14px 0}
+.rs-triage-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:12px 0}
+.rs-workspace-panel{margin:12px 0;padding:14px}
+.rs-notes-label{display:block}
+.rs-notes-input{width:100%}
+
+/* Screen-reader-visible heading without disrupting compact dashboard geometry. */
+.rs-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}

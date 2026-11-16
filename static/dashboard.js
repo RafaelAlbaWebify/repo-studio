@@ -21,7 +21,7 @@ function updateDashboardStatus(){
 function resetDashboard(){
  ['dashPython','dashCycles','dashComplexity','dashUnused'].forEach(id=>dashText(id,'—'));
  dashText('dashPythonStatus','Not analyzed');dashText('dashUnusedStatus','Not analyzed');
- dashText('dashDonutTotal','—');$('#dashDonut').style.background='conic-gradient(#343746 0 100%)';
+ dashText('dashDonutTotal','—');rsStyle($('#dashDonut'),'background','conic-gradient(#343746 0 100%)');
  $('#dashDonut').setAttribute('aria-label','No Python scan available');
  $('#dashDistribution').replaceChildren(el('p','Run Python analysis to display findings.','quiet'));
  $('#dashHotspots').replaceChildren(el('p','No analysis performed.','quiet'));
@@ -57,11 +57,11 @@ function renderDashboard(){
  for(const r of rows){
    const b=el('button','','dash-legend-row');b.type='button';b.dataset.type=r.type;
    b.setAttribute('aria-label',`Review ${r.count} ${r.name} candidates`);
-   const dot=el('span','','dash-legend-dot');dot.style.background=r.color;
+   const dot=el('span','','dash-legend-dot');rsStyle(dot,'background',r.color);
    b.append(dot,el('span',r.name,'dash-legend-name'),el('strong',number(r.count)));b.onclick=()=>dashGo(r.type);root.append(b);
    if(total){const next=pct+100*r.count/total;stops.push(`${r.color} ${pct}% ${next}%`);pct=next;}
  }
- $('#dashDonut').style.background=total?`conic-gradient(${stops.join(',')})`:'conic-gradient(#343746 0 100%)';
+ rsStyle($('#dashDonut'),'background',total?`conic-gradient(${stops.join(',')})`:'conic-gradient(#343746 0 100%)');
  $('#dashDonut').setAttribute('aria-label',`${total} AST candidates distributed among ${rows.map(x=>x.name).join(', ')}`);
  const center=$('#dashDonutTotal');center.replaceChildren(el('strong',number(total)),el('small','AST candidates'));
  if(!h.unusedScanEligible)root.append(el('p','Unused analysis not eligible; excluded from total.','quiet'));
@@ -73,7 +73,7 @@ function renderDashboard(){
  const max=Math.max(1,...tops.map(x=>x.count));
  for(const x of tops){const b=el('button','','dash-hotspot-row');b.type='button';b.title=`${x.file}: ${x.count} complexity candidates; highest approximate branching ${x.peak}`;
  const top=el('div','','dash-hotspot-header');top.append(el('span',x.file,'dashboard-hotspot-path'),el('strong',number(x.count)));
- const track=el('span','','dashboard-track'),fill=el('span','','dashboard-fill');fill.style.width=`${100*x.count/max}%`;track.append(fill);b.append(top,track);
+ const track=el('span','','dashboard-track'),fill=el('span','','dashboard-fill');rsStyle(fill,'width',`${100*x.count/max}%`);track.append(fill);b.append(top,track);
  b.onclick=()=>dashGo('complexity',x.file);hot.append(b);}
  const queue=$('#dashPriority');queue.replaceChildren();
  const cycle=(h.cycles||[]).find(c=>c.files?.length);
