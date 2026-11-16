@@ -4,6 +4,42 @@
 
 Repo Studio is a local web application for examining committed code in legacy Git repositories and assembling traceable evidence for optional AI-assisted analysis. It does **not** upload repository content to AI services, automatically modify inspected source, or assert that a static finding is a defect.
 
+## Understand legacy code before changing it
+
+**Repo Studio** is a free, open-source, local-first workspace for investigating existing Git repositories. It brings source navigation, static-analysis candidates, dependency evidence, human review decisions and carefully scoped AI-ready context together in one browser interface.
+
+**The problem:** legacy repositories often have thousands of files, overlapping analyzer findings and incomplete context. Getting oriented, confirming what an observation actually means and remembering what has already been reviewed can become its own project.
+
+**The approach:** inspect committed code, trace an observation back to its source, record the evidence and your decision, and export only the context you deliberately select. Repo Studio does not modify the inspected repository or automatically send its contents to an AI service.
+
+[**Download the latest beta**](https://github.com/RafaelAlbaWebify/repo-studio/releases/tag/v0.9.10) · [**Installation guides**](#installation--omarchy-ubuntu-and-windows) · [**Security and limitations**](SECURITY.md) · [**Demonstration guide**](docs/DEMO_GUIDE.md)
+
+### What you can do
+
+1. **Explore:** browse committed files, Python import cycles, complexity candidates and duplication matches; follow source locations instead of treating findings as conclusions.
+2. **Triage:** inspect imported professional analyzer observations, apply reversible filters and distinguish review priority from proven severity.
+3. **Investigate:** examine dependency evidence, identify missing context and assemble compact or extended source excerpts under your control.
+4. **Remember:** keep local SQLite-backed investigation notes, progress, human decisions and export history scoped to the repository and commit.
+5. **Revalidate:** see whether recorded source evidence has changed across commits, without assuming an unchanged excerpt guarantees unchanged behavior.
+
+<details>
+<summary><strong>What Repo Studio is not</strong></summary>
+
+It is not an autonomous refactoring agent, an all-language code-quality oracle or a hosted AI service. Python AST analysis has intentional limits; jscpd and Repowise require separate optional installation/configuration. Findings are candidates for human review. There is no demonstrated end-to-end time or token saving to claim. The beta passed automated Linux/Windows CI, but independent manual installations on every platform have not been completed.
+
+</details>
+
+### At a glance
+
+| | |
+| --- | --- |
+| **License** | MIT |
+| **Platform** | Linux (including Omarchy and Ubuntu) and Windows 10/11 |
+| **Runtime** | Python 3.10+, Git, browser; no required runtime pip packages |
+| **Data model** | Localhost service; reads committed Git HEAD, persists separate local review state |
+| **AI integration** | Human-selected export; no automatic LLM calls or code uploads |
+| **Release** | [v0.9.10 beta](https://github.com/RafaelAlbaWebify/repo-studio/releases/tag/v0.9.10) |
+
 ## Features
 
 - Git commit-pinned source browsing, comparisons and SHA-256 evidence references.
