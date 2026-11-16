@@ -1,6 +1,6 @@
 # Install Repo Studio on Omarchy (Linux)
 
-**Repo Studio 0.9.9 beta** runs locally using Python 3.10+, Git and a browser. No paid AI provider, administrator account or runtime pip packages are required.
+**Repo Studio 0.9.10 beta** runs locally using Python 3.10+, Git and a browser. No paid AI provider, administrator account or runtime pip packages are required.
 
 ## 1. First-time portable installation
 
