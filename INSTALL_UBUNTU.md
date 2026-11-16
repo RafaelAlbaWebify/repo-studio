@@ -1,6 +1,6 @@
 # Install Repo Studio on Ubuntu (and related Debian-based desktops)
 
-**Repo Studio 0.9.9 beta** is a localhost-only app using Python 3.10+, Git and a modern browser. The core application requires no Python runtime pip packages or AI account.
+**Repo Studio 0.9.10 beta** is a localhost-only app using Python 3.10+, Git and a modern browser. The core application requires no Python runtime pip packages or AI account.
 
 ## 1. Prerequisites
 
