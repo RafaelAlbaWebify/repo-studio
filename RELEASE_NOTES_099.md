@@ -1,23 +1,29 @@
-# Repo Studio 0.9.9 — Linux + Windows beta release candidate
+# Repo Studio 0.9.9 — Linux + Windows beta
 
-**Status:** candidate only. No release published; no merge into `main` authorized.
+Repo Studio is a **local-first, evidence-first investigation tool** for existing Git repositories. This is a **beta/prerelease**, not a claim of production-grade completeness.
 
-## What's new
-- Professional Findings: grouped analyzer observations, review-first triage queues and source-linked investigation records.
-- Conservative commit-scoped coverage and evidence exports for human-controlled analysis.
-- Local Investigation Workspace with notes, progress, decisions and export history; evidence remains tied to the inspected commit.
-- Keyboard and modal focus improvements, responsive layout fixes and strict CSP-safe rendering.
-- Optional Repowise index-backed symbol lookup and jscpd scans; missing tools or indexes are reported, not treated as no findings.
+## Highlights
+- Professional Findings: normalized analyzer diagnostics, grouped review queues and source-linked evidence.
+- Commit-scoped investigation coverage, explicit missing-evidence reporting and human decisions.
+- Local SQLite Investigation Workspace for notes, review status, export history and source revalidation.
+- Context Builder with human-selected snippets and evidence export for optional external AI review (no automatic AI calls).
+- Responsive UI, keyboard improvements and strict Content Security Policy-compatible rendering.
 
-## Verification performed
-- Omarchy development lab: 91 Python tests, responsive and targeted Playwright checks passed; clean portable Linux ZIP installation passed.
-- GitHub Actions for commit `fbc32ed` on `rc/p0a-professional-triage-20261116`: `unit-linux`, `browser-linux` and `unit-windows` all passed (2026-11-16).
-- Windows CI includes installer/update/rollback smoke and Chromium Workspace E2E. Independent manual Windows installation is still pending.
+## Install
+- **Linux / Omarchy:** use the ZIP in conjunction with the documented local launcher/manager. Requirements: Python 3.10+, Git, browser. Existing Omarchy installs use the versioned ZIP updater with backup and rollback.
+- **Windows 10/11:** unpack the ZIP and follow `WINDOWS_INSTALL.md` to install per-user using `install_windows.ps1`. Requirements: Python 3.10+, Git for Windows, PowerShell and a browser.
+- No admin privileges or paid API accounts are required for the core application. Optional analyzers such as jscpd/Repowise need separate configuration.
 
-## Known limits and publication gates
-- Localhost-only application. The source repository is inspected read-only; Workspace metadata is stored locally.
-- Static analysis identifies investigation candidates, not proven defects or safe refactors.
-- No automatic source edits, external LLM calls or demonstrated end-to-end productivity gains.
-- Independent user installation checks, Omarchy in-place upgrade, privacy sign-off, release approval and demo review are not complete.
+## Verification
+- On commit `88e4c72`, GitHub Actions `unit-linux`, `browser-linux`, and `unit-windows` succeeded (run 43854586048). The Windows job included installer/update/rollback and browser acceptance.
+- Local isolated Omarchy 0.9.8 → 0.9.9 update, synthetic SQLite persistence and rollback: six acceptance checks passed (2026-11-16).
+- Actual Omarchy installation shown running version 0.9.9 at localhost:8765 with Veridra repository and analysis data (2026-11-16).
+- CI for the final documentation commit and merged `main` must pass separately before this archive is published.
 
-Read `README.md`, `WINDOWS_INSTALL.md`, `SECURITY.md` and `PUBLICATION_CHECKLIST.md` before distribution.
+## Limits
+- Independent hands-on end-user installation on separate Linux and Windows devices remains unverified. Automated Windows CI does not replace this.
+- No independently signed-off full privacy review; scan and review source exports before external distribution or sharing.
+- Static-analysis findings are review candidates, **not** confirmed defects; token counts are estimates and full-workflow time/token savings have **not** been established.
+- Committed source excerpts may contain proprietary code or secrets. Review exports before sharing. The app does not automatically upload inspected code or perform refactors.
+
+See `README.md`, `WINDOWS_INSTALL.md`, `SECURITY.md` and `PUBLICATION_CHECKLIST.md`.
