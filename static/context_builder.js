@@ -65,7 +65,7 @@ function builderUpdate(){
   const estimated=Math.ceil(pkg.markdown.length/4),budget=Number(builderNode('contextBudget').value);
   const over=estimated>budget;
   builderNode('contextSummary').textContent=`${pkg.chosen} selected · ${pkg.omitted} excluded · ≈${estimated.toLocaleString()} tokens (chars/4) · ${over?'OVER target budget':'within target budget'}`;
-  builderNode('contextSummary').style.color=over?'#e7b369':'';
+  rsStyle(builderNode('contextSummary'),'color',over?'#e7b369':'');
   builderNode('contextCopy').disabled=!pkg.chosen;
   builderNode('contextDownload').disabled=!pkg.chosen;
 }

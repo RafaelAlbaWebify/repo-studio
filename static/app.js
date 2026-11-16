@@ -8,8 +8,8 @@ function setPage(name){$$('.page').forEach(x=>x.classList.toggle('hidden',x.id!=
 function treeOf(paths){const root={name:'',dirs:new Map(),files:[]};for(const path of paths){const parts=path.split('/');let node=root;for(const part of parts.slice(0,-1)){if(!node.dirs.has(part))node.dirs.set(part,{name:part,dirs:new Map(),files:[]});node=node.dirs.get(part);}node.files.push({name:parts.at(-1),path});}return root;}
 function matchesTree(node,query,prefix=''){if(!query)return true;if(node.files.some(f=>f.path.toLowerCase().includes(query)))return true;for(const [name,child] of node.dirs)if(matchesTree(child,query,prefix+name+'/'))return true;return false;}
 function renderFiles(){const q=$('#fileFilter').value.trim().toLowerCase(),list=$('#fileList');list.replaceChildren();if(!treeRoot)return;
-function visit(node,prefix='',depth=0){const dirs=[...node.dirs].sort((a,b)=>a[0].localeCompare(b[0]));for(const [name,child] of dirs){const path=prefix+name+'/';if(!matchesTree(child,q))continue;const expanded=q!==''||expandedDirs.has(path);const btn=el('button','','tree-row');btn.type='button';btn.style.paddingLeft=`${10+depth*15}px`;btn.setAttribute('aria-expanded',String(expanded));btn.append(el('span',expanded?'▾':'▸','tree-symbol'),el('span',name,'tree-name'));btn.title=path;btn.onclick=()=>{if(expandedDirs.has(path))expandedDirs.delete(path);else expandedDirs.add(path);renderFiles();};list.append(btn);if(expanded)visit(child,path,depth+1);}
-for(const f of [...node.files].sort((a,b)=>a.name.localeCompare(b.name))){if(q&&!f.path.toLowerCase().includes(q))continue;const btn=el('button','','tree-row'+(selectedFile===f.path?' is-selected':''));btn.type='button';btn.style.paddingLeft=`${10+depth*15}px`;btn.append(el('span','◇','tree-symbol'),el('span',f.name,'tree-name'));btn.title=f.path;btn.onclick=()=>openFile(f.path);list.append(btn);}}
+function visit(node,prefix='',depth=0){const dirs=[...node.dirs].sort((a,b)=>a[0].localeCompare(b[0]));for(const [name,child] of dirs){const path=prefix+name+'/';if(!matchesTree(child,q))continue;const expanded=q!==''||expandedDirs.has(path);const btn=el('button','','tree-row');btn.type='button';rsStyle(btn,"padding-left",`${10+depth*15}px`);btn.setAttribute('aria-expanded',String(expanded));btn.append(el('span',expanded?'▾':'▸','tree-symbol'),el('span',name,'tree-name'));btn.title=path;btn.onclick=()=>{if(expandedDirs.has(path))expandedDirs.delete(path);else expandedDirs.add(path);renderFiles();};list.append(btn);if(expanded)visit(child,path,depth+1);}
+for(const f of [...node.files].sort((a,b)=>a.name.localeCompare(b.name))){if(q&&!f.path.toLowerCase().includes(q))continue;const btn=el('button','','tree-row'+(selectedFile===f.path?' is-selected':''));btn.type='button';rsStyle(btn,"padding-left",`${10+depth*15}px`);btn.append(el('span','◇','tree-symbol'),el('span',f.name,'tree-name'));btn.title=f.path;btn.onclick=()=>openFile(f.path);list.append(btn);}}
 visit(treeRoot);if(!list.children.length)list.append(el('div','No matching files.','empty-text'));}
 async function openFile(path,line=0){setPage('files');selectedFile=path;activeLine=Number(line)||0;const parts=path.split('/');let prefix='';for(const part of parts.slice(0,-1)){prefix+=part+'/';expandedDirs.add(prefix);}$('#fileFilter').value='';renderFiles();$('#fileTitle').textContent=path;$('#fileMeta').textContent='Loading committed HEAD…';$('#contextBtn').disabled=true;$('#contextResults').classList.add('hidden');$('#contextResults').replaceChildren();const parent=$('#fileContent');parent.replaceChildren(el('div','Loading source…','empty-text'));
 try{const d=await api('/api/file?path='+encodeURIComponent(path));if(selectedFile!==path)return;const lines=d.content.split('\n');if(lines.at(-1)==='')lines.pop();parent.replaceChildren();const fragment=document.createDocumentFragment();for(let i=0;i<lines.length;i++){const row=el('div','','sourceLine'+(activeLine===i+1?' is-target':''));row.dataset.line=i+1;const number=el('span',String(i+1),'lineNo');const code=el('span',lines[i]||' ','lineText');row.append(number,code);fragment.append(row);}parent.append(fragment);$('#fileMeta').textContent=lines.length.toLocaleString()+' lines · HEAD';$('#contextBtn').disabled=!(state.indexReady&&state.repowiseAvailable);const target=parent.querySelector('.is-target');if(target)target.scrollIntoView({block:'center',behavior:'instant'});else $('#sourceScroll').scrollTop=0;}catch(e){parent.replaceChildren(el('div',e.message,'empty-text'));$('#fileMeta').textContent='Unavailable';toast(e.message);}}
@@ -88,3 +88,30 @@ load().catch(e=>toast(e.message));
   void checkServer();
   setInterval(checkServer, 2500);
 })();
+
+/* RS_SOURCE_VIEW_V1 — deterministic, read-only code-view controls. */
+document.addEventListener('DOMContentLoaded', () => {
+  const source = document.getElementById('sourceScroll');
+  const tools = document.querySelector('#files .fileTools');
+  if (!source || !tools || document.getElementById('rsSourceWrap')) return;
+  const group = document.createElement('span');
+  group.className = 'rs-source-controls';
+  group.setAttribute('role','group');
+  group.setAttribute('aria-label','Code display options');
+  function button(id,label,title,onClick) {
+    const b=document.createElement('button');
+    b.type='button'; b.id=id; b.textContent=label; b.title=title;
+    b.setAttribute('aria-label',title); b.addEventListener('click',onClick);
+    group.append(b);return b;
+  }
+  const wrap=button('rsSourceWrap','Wrap lines','Wrap long source lines',()=>{
+    const active=source.classList.toggle('rs-wrap');
+    wrap.setAttribute('aria-pressed',String(active));
+    left.disabled=active;right.disabled=active;
+    if(active)source.scrollLeft=0;
+  });
+  wrap.setAttribute('aria-pressed','false');
+  const left=button('rsSourceLeft','←','Scroll code left',()=>source.scrollBy({left:-Math.max(180,source.clientWidth*.65),behavior:'auto'}));
+  const right=button('rsSourceRight','→','Scroll code right',()=>source.scrollBy({left:Math.max(180,source.clientWidth*.65),behavior:'auto'}));
+  tools.append(group);
+});

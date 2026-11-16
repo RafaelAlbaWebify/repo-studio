@@ -4,6 +4,9 @@ from __future__ import annotations
 import argparse, hashlib, http.server, json, os, pathlib, re, secrets, shutil, subprocess, tarfile, tempfile, threading, time, urllib.parse, webbrowser
 from collections import Counter
 from analysis import analyze_python, export_evidence
+from coverage_engine import coverage_report
+from triage_engine import public_summary, filter_findings
+from professional_workflow import find_finding, dossier as professional_dossier
 from workspace import Workspace
 
 ROOT=pathlib.Path(__file__).resolve().parent
@@ -141,7 +144,7 @@ def finding_cases(dups,commit):
             'cases':cases,'method':'jscpd file-pair grouping with merged intervals; not a refactoring recommendation'}
 
 class State:
-    def __init__(self,repo,data,jscpd=None,index=None,repowise=None,jscpd_bin=None):
+    def __init__(self,repo,data,jscpd=None,index=None,repowise=None,jscpd_bin=None,triage_report=None):
         self.lock=threading.Lock();self.busy=False;self.error=None;self.latest=None
         self.repo=git_root(repo);self.commit=sha(self.repo)
         self.data=pathlib.Path(data).expanduser().resolve();self.data.mkdir(parents=True,exist_ok=True)
@@ -153,6 +156,8 @@ class State:
         self.token=secrets.token_urlsafe(32)
         self.workspace=Workspace(self.data)
         self._analysis_cache=None
+        self.triage_report_path=pathlib.Path(triage_report).expanduser().resolve() if triage_report else None
+        self._triage_cache=None
     def status(self):
         return {'repository':str(self.repo),'commit':self.commit,'busy':self.busy,'error':self.error,'reportReady':bool(self.report and self.report.is_file()),'jscpdAvailable':bool(self.jscpd_bin),'repowiseAvailable':bool(self.repowise),'indexReady':bool(self.index and self.index.is_dir()),'dataPath':str(self.data),'token':self.token}
     def select(self,p):
@@ -160,7 +165,7 @@ class State:
         if r==self.data or r in self.data.parents:raise ValueError('La carpeta de resultados no puede estar dentro del repositorio')
         with self.lock:
             if self.busy:raise ValueError('Hay una auditoría en curso')
-            self.repo=r;self.commit=commit;self.report=None;self.index=None;self.error=None;self._analysis_cache=None
+            self.repo=r;self.commit=commit;self.report=None;self.index=None;self.error=None;self._analysis_cache=None;self._triage_cache=None
     def start_audit(self):
         with self.lock:
             if self.busy: raise ValueError('Ya hay una auditoría en curso')
@@ -184,6 +189,24 @@ class State:
             self.error=str(e)[:600]
         finally:
             with self.lock:self.busy=False
+    def coverage(self):
+        self.require_selected_commit()
+        return coverage_report(self.repo, self.commit)
+
+    def triage(self):
+        self.require_selected_commit()
+        if self.triage_report_path is None:
+            raise ValueError('No imported professional analysis configured; use --triage-report')
+        with self.lock:
+            if self._triage_cache is not None:
+                return self._triage_cache
+        report=json.loads(self.triage_report_path.read_text(encoding='utf-8'))
+        if report.get('repositoryCommit') != self.commit or not isinstance(report.get('findings'),list):
+            raise ValueError('Imported triage report does not match the selected Git commit')
+        with self.lock:
+            self._triage_cache=report
+        return report
+
     def analysis(self):
         # Pin to the selected commit; do not silently analyze a different HEAD.
         if sha(self.repo)!=self.commit:
@@ -207,6 +230,8 @@ class State:
             return self._analysis_cache
     def finding_source_paths(self,kind,fid):
         """Only derive source paths from a finding actually detected at this commit."""
+        if kind=='professional':
+            return [find_finding(self.triage(),fid)['path']]
         if kind=='duplication':
             if not self.report or not self.report.is_file():return None
             candidates=finding_cases(duplicates_doc(self.report),self.commit)['cases']
@@ -261,6 +286,10 @@ class State:
             raise ValueError('HEAD changed. Reselect repository first.')
 
     def search(self,query):
+        # RS_INDEX_COMMIT_GUARD_V1: never search stale or wrong-repository index.
+        self.require_selected_commit()
+        if self.index is not None and self.index.is_dir() and sha(self.index) != self.commit:
+            raise ValueError('Repowise index commit does not match selected repository')
         if not self.index or not self.index.is_dir():raise ValueError('Índice Repowise no configurado')
         if not self.repowise:raise ValueError('Repowise no instalado')
         if not query or len(query)>120:raise ValueError('Consulta no válida')
@@ -271,6 +300,8 @@ class State:
         self.require_selected_commit()
         if path not in set(entries(self.repo,self.commit)):
             raise ValueError('Archivo no encontrado en HEAD')
+        if self.index is not None and self.index.is_dir() and sha(self.index) != self.commit:
+            raise ValueError('Repowise index commit does not match selected repository')
         if not self.index or not self.index.is_dir():
             raise ValueError('Índice Repowise no configurado')
         if not self.repowise:
@@ -301,7 +332,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         try:
             p=urllib.parse.urlparse(self.path);q=urllib.parse.parse_qs(p.query);s=self.server.state
             if p.path=='/':return self.static('index.html','text/html; charset=utf-8')
+            if p.path=='/csp_styles.js':return self.static('csp_styles.js','text/javascript; charset=utf-8')
             if p.path=='/app.js':return self.static('app.js','text/javascript; charset=utf-8')
+            if p.path=='/triage_ui.js':return self.static('triage_ui.js','text/javascript; charset=utf-8')
+            if p.path=='/professional_workflow_ui.js':return self.static('professional_workflow_ui.js','text/javascript; charset=utf-8')
             if p.path=='/compare.js':return self.static('compare.js','text/javascript; charset=utf-8')
             if p.path=='/analysis.js':return self.static('analysis.js','text/javascript; charset=utf-8')
             if p.path=='/dashboard.js':return self.static('dashboard.js','text/javascript; charset=utf-8')
@@ -327,6 +361,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if p.path=='/api/duplicates':return self.respond(duplicates_doc(s.report) if s.report and s.report.is_file() else {'stats':{},'items':[],'groups':{}})
             if p.path=='/api/findings':return self.respond(finding_cases(duplicates_doc(s.report) if s.report and s.report.is_file() else {'items':[]},s.commit))
             if p.path=='/api/analysis':return self.respond(s.analysis())
+            if p.path=='/api/triage':return self.respond(public_summary(s.triage()))
+            if p.path=='/api/professional/dossier':
+                s.require_selected_commit()
+                pkg=professional_dossier(s.triage(),q.get('id',[''])[0],s.commit,
+                    lambda path:file_at(s.repo,path,s.commit),q.get('level',['balanced'])[0])
+                return self.respond(pkg)
+            if p.path=='/api/triage/findings':
+                def arg(name,default):return q.get(name,[default])[0]
+                return self.respond(filter_findings(s.triage(),area=arg('area','all'),queue=arg('queue','all'),
+                    analyzer=arg('analyzer','all'),hide_noise=arg('hide_noise','0')=='1',
+                    offset=int(arg('offset','0')),limit=int(arg('limit','50'))))
+            if p.path=='/api/coverage':return self.respond(s.coverage())
             if p.path=='/api/evidence':return self.respond(s.evidence(q.get('type',[''])[0],q.get('id',[''])[0],q.get('level',['balanced'])[0]))
             if p.path=='/api/source-range':return self.respond(s.source_range(q.get('path',[''])[0],q.get('first',[''])[0],q.get('last',[''])[0]))
             if p.path=='/api/search':return self.respond(s.search(q.get('q',[''])[0]))
@@ -346,6 +392,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if p=='/api/select':s.select(body.get('path',''));return self.respond(s.status())
             if p=='/api/workspace/update':
                 s.require_selected_commit()
+                if body.get('kind')=='professional':
+                    find_finding(s.triage(),body.get('id'))
                 return self.respond(s.workspace.update(s.repo,s.commit,body.get('kind'),body.get('id'),body.get('progress'),body.get('decision'),body.get('notes'),s.finding_source_paths(body.get('kind'),body.get('id'))))
             if p=='/api/workspace/export':
                 s.require_selected_commit()
@@ -370,8 +418,9 @@ def main(argv=None):
     a=argparse.ArgumentParser(description=__doc__)
     a.add_argument('--repo',required=True);a.add_argument('--data',default=str(default_data_dir()))
     a.add_argument('--jscpd-report');a.add_argument('--repowise-index');a.add_argument('--jscpd-bin');a.add_argument('--repowise-bin');a.add_argument('--port',type=int,default=8765)
+    a.add_argument('--triage-report',help='Previously normalized read-only analysis report (JSON)')
     opts=a.parse_args(argv)
-    state=State(opts.repo,opts.data,opts.jscpd_report,opts.repowise_index,opts.repowise_bin,opts.jscpd_bin)
+    state=State(opts.repo,opts.data,opts.jscpd_report,opts.repowise_index,opts.repowise_bin,opts.jscpd_bin,opts.triage_report)
     server=http.server.ThreadingHTTPServer(('127.0.0.1',opts.port),Handler);server.state=state
     print(f'Repo Studio: http://127.0.0.1:{server.server_port}',flush=True)
     print('Solo lectura. Ctrl+C para salir.',flush=True)
