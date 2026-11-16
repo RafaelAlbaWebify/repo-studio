@@ -1,4 +1,4 @@
-# Windows installation (candidate — native Windows validation pending)
+# Windows installation (0.9.9 beta candidate — CI validated)
 
 **Requirements:** Windows 10/11, Python 3.10+ (`py -3` or `python`), Git for Windows, PowerShell 5.1 or newer, and a browser. No admin rights or Python runtime pip packages required.
 
@@ -17,6 +17,6 @@ If script execution is restricted, follow your organization’s PowerShell polic
 
 **Updates:** close Repo Studio, then run `install_windows.ps1` from the newer extracted release. It preserves config and state and retains a previous-release code backup under `%LOCALAPPDATA%\RepoStudio\backup\previous-release`. It refuses to replace an existing rollback backup. To restore the previous code (without removing newer state), run `install_windows.ps1 -Rollback`. No automated database downgrade is asserted.
 
-**Scope of validation:** Python tests and simulated Windows paths can run on Linux; actual process launching, installation, PowerShell scripts and UI must pass the GitHub Actions Windows runner before calling Windows supported. A clean Windows user test remains desirable.
+**Scope of validation:** The GitHub Actions `unit-windows` job passed on commit `fbc32ed` (2026-11-16), covering unit tests, portable installation, HTTP/SQLite smoke, installer backup/rollback and Chromium Workspace acceptance. A clean, independent Windows end-user installation and interactive manual acceptance are still pending.
 
-**Native installer QA:** `.github/workflows/ci.yml` runs `python -B tools/windows_installer_smoke.py` on `windows-latest`, covering fresh install, update, backup protection, rollback, user configuration and state retention. Until that workflow runs successfully on Windows, native installer support remains unverified.
+**Native installer QA:** `.github/workflows/ci.yml` runs `python -B tools/windows_installer_smoke.py` on `windows-latest`, covering fresh install, update, backup protection, rollback, user configuration and state retention. This workflow passed on commit `fbc32ed`; that is automated CI evidence, not a substitute for independent end-user installation.

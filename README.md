@@ -1,6 +1,6 @@
 # Repo Studio
 
-**Evidence-first investigation of existing Git repositories** · Linux + Windows beta candidate 0.9.8 · Local-first · Read-only source inspection · Human-controlled
+**Evidence-first investigation of existing Git repositories** · Linux + Windows beta candidate 0.9.9 · Local-first · Read-only source inspection · Human-controlled
 
 Repo Studio is a local web application for examining committed code in legacy Git repositories and assembling traceable evidence for optional AI-assisted analysis. It does **not** upload repository content to AI services, automatically modify inspected source, or assert that a static finding is a defect.
 
@@ -10,6 +10,8 @@ Repo Studio is a local web application for examining committed code in legacy Gi
 - Python AST import-cycle and complexity candidates; conservative potential-unused detection.
 - Optional jscpd clone-report scanning and Repowise indexes, using separately installed tools.
 - Dependency explorer, source-linked code-health review, Context Builder and Compact/Balanced/Extended evidence exports.
+- **Professional findings and triage:** normalized results from optional analyzers; review-first queues, evidence-linked source locations, progress and human decisions. Analyzer findings are not automatically classified as confirmed defects.
+- **Commit-scoped coverage:** track observed source areas and missing evidence conservatively; coverage is not a correctness score.
 - **Investigation Workspace:** local SQLite history, notes, review progress, human decisions, recorded exports and source-evidence revalidation between commits. It does not automatically equate findings across commits or branches.
 - Help, About and in-app explanations.
 
@@ -23,9 +25,9 @@ python3 -B studio.py --repo /absolute/path/to/git-repository --port 8765
 
 Open `http://127.0.0.1:8765` (localhost only). The repository's committed files are inspected; its working tree is not edited. The application's local database and exports should be kept outside the inspected repository. Consult `python3 studio.py --help` for optional analyzer and data paths.
 
-**Windows installation/update:** see [WINDOWS_INSTALL.md](WINDOWS_INSTALL.md) for a per-user PowerShell installer, configuration and rollback. Windows support remains a candidate until native Windows CI and browser acceptance pass.
+**Windows installation/update:** see [WINDOWS_INSTALL.md](WINDOWS_INSTALL.md) for a per-user PowerShell installer, configuration and rollback. The 0.9.9 candidate passed native Windows CI unit, browser and installer-smoke jobs for commit `fbc32ed`; a manual installation on an independent Windows machine/profile remains pending.
 
-**Omarchy installation/update:** use the separately verified controlled installer; do not overwrite an active installation manually. The clean-profile portable smoke test passes in an isolated Linux container, but a separate machine/profile acceptance and the in-place Omarchy 0.9.8 upgrade remain publication gates.
+**Omarchy installation/update:** use the separately verified controlled installer; do not overwrite an active installation manually. The clean-profile portable smoke test passes in an isolated Linux container, but a separate machine/profile acceptance and the in-place Omarchy 0.9.9 upgrade remain publication gates.
 
 ## Use the Workspace
 
@@ -62,9 +64,9 @@ A limited internal comparison of initial context inputs exists, but **no measure
 - Localhost HTTP is not a multi-user authorization boundary; do not expose the service to the public internet.
 - Exports can contain committed credentials or private code. Always inspect before uploading or sharing.
 - AST and clone detections are candidates, not definitive bugs or safe refactoring instructions.
-- Native Windows CI and actual Windows installer/browser acceptance, an independent Linux install, and full-workflow quality-matched benchmarks remain unverified.
+- Native Windows CI (unit, Chromium and installer smoke) passed for commit `fbc32ed`. Independent manual Windows installation, an independent Linux install, in-place Omarchy upgrade and full-workflow quality-matched benchmarks remain unverified.
 
-See `SECURITY.md`, `THIRD_PARTY.md`, `PUBLICATION_CHECKLIST.md` and `RELEASE_NOTES_098.md`.
+See `SECURITY.md`, `THIRD_PARTY.md`, `PUBLICATION_CHECKLIST.md` and `RELEASE_NOTES_099.md`.
 
 ## License
 

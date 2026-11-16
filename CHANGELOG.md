@@ -1,3 +1,12 @@
+## 0.9.9 (beta release candidate, 2026-11-16)
+- Added Professional Findings, normalized analyzer triage and source-linked investigation dossiers.
+- Added conservative commit-scoped coverage workflows and review-first candidate handling.
+- Improved investigation UI keyboard focus, responsive layout and strict Content Security Policy compatibility.
+- Integrated optional commit-guarded Repowise symbol lookup with the tested development lab; Repowise and jscpd remain optional tools.
+- Verified 91 Python tests and GitHub Actions Linux unit/browser and Windows unit/browser/installer-smoke jobs on commit `fbc32ed` (2026-11-16).
+- Packaging and clean Linux smoke passed locally; independent end-user installations, Omarchy in-place upgrade, release approval and announcement remain pending.
+- No automatic source editing, remote AI requests, safety verdicts or validated end-to-end productivity savings.
+
 ## 0.9.8 (beta candidate, 2026-11-14)
 - Investigation Workspace integrated with source-linked finding navigation, persistent reviews, recorded exports, historical filters and conservative commit-specific revalidation.
 - Tested with 76 Python unit cases and 8 Chromium/Playwright Workspace checks on Omarchy (user-observed); final packaging/installation pending.
