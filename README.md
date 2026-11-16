@@ -15,19 +15,27 @@ Repo Studio is a local web application for examining committed code in legacy Gi
 - **Investigation Workspace:** local SQLite history, notes, review progress, human decisions, recorded exports and source-evidence revalidation between commits. It does not automatically equate findings across commits or branches.
 - Help, About and in-app explanations.
 
-## Local launch (portable/development)
+## Installation — Omarchy, Ubuntu and Windows
 
-Requirements: Linux or Windows 10/11, Python 3.10+, Git and a modern browser. No additional Python **runtime** packages required. From this directory:
+Choose your platform guide for **fresh installation, updates, configuration, troubleshooting and rollback**:
 
-```sh
-python3 -B studio.py --repo /absolute/path/to/git-repository --port 8765
+- [Omarchy (Linux desktop)](INSTALL_OMARCHY.md) — portable installation and optional launcher; separately installed desktop managers have their own update workflow.
+- [Ubuntu / Debian-based Linux](INSTALL_UBUNTU.md) — dependencies and portable startup on a standard desktop.
+- [Windows 10/11](WINDOWS_INSTALL.md) — validated per-user PowerShell installer with backup and rollback.
+
+**Portable startup on Linux (also suitable for Omarchy):**
+
+```bash
+git clone https://github.com/RafaelAlbaWebify/repo-studio.git
+cd repo-studio
+python3 -B studio.py --repo /absolute/path/to/your/git-repository --port 8765
 ```
 
-Open `http://127.0.0.1:8765` (localhost only). The repository's committed files are inspected; its working tree is not edited. The application's local database and exports should be kept outside the inspected repository. Consult `python3 studio.py --help` for optional analyzer and data paths.
+Alternatively extract the source ZIP and run the command from its extracted application directory. A modern browser opens `http://127.0.0.1:8765`. Python 3.10+ and Git are required; no runtime pip packages or paid AI APIs are needed. The inspected repository must already be a local Git repository with a commit. The app reads committed HEAD, not uncommitted changes.
 
-**Windows installation/update:** see [WINDOWS_INSTALL.md](WINDOWS_INSTALL.md) for a per-user PowerShell installer, configuration and rollback. The 0.9.9 beta passed native Windows CI unit, browser and installer-smoke jobs for commit `88e4c72`; a manual installation on an independent Windows machine/profile remains pending.
+**Existing managed Omarchy installation:** use its **own** release-aware manager and compatible signed-off ZIP; do not replace application files by hand or run the updater intended for another installation. The manager used on the project owner's machine is a separate local component and is **not** bundled as a general-purpose installer. See the Omarchy guide.
 
-**Omarchy installation/update:** use the separately verified controlled installer; do not overwrite an active installation manually. The clean-profile portable smoke test and isolated Omarchy upgrade/rollback passed; version 0.9.9 was observed running in the actual Omarchy Apps installation. Independent separate-device installation is not yet verified.
+**Windows:** install using `install_windows.ps1`; do not use the Linux commands. See the Windows guide for paths and rollback.
 
 ## Use the Workspace
 
