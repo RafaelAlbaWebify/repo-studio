@@ -12,7 +12,7 @@ Repo Studio is a local web application for examining committed code in legacy Gi
 
 **The approach:** inspect committed code, trace an observation back to its source, record the evidence and your decision, and export only the context you deliberately select. Repo Studio does not modify the inspected repository or automatically send its contents to an AI service.
 
-[**Download the latest beta**](https://github.com/RafaelAlbaWebify/repo-studio/releases/latest) · [**Installation guides**](#installation--omarchy-ubuntu-and-windows) · [**Security and limitations**](SECURITY.md) · [**Demonstration guide**](docs/DEMO_GUIDE.md)
+[**Download the latest beta**](https://github.com/RafaelAlbaWebify/repo-studio/releases/tag/v0.9.10) · [**Installation guides**](#installation--omarchy-ubuntu-and-windows) · [**Security and limitations**](SECURITY.md) · [**Demonstration guide**](docs/DEMO_GUIDE.md)
 
 ### What you can do
 
