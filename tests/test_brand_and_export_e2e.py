@@ -5,7 +5,7 @@ class BrandAndExportTests(unittest.TestCase):
  def test_icon_files_and_ui(self):
   html=(ROOT/'static/index.html').read_text()
   self.assertIn('repo-studio-icon.svg',html)
-  self.assertIn('BETA 0.9.9',html)
+  self.assertIn('BETA 0.9.10',html)
   for f in ('favicon.svg','repo-studio-icon.svg','repo-studio-icon.png','repo-studio-logo.svg'):
    self.assertTrue((ROOT/'static'/f).is_file())
  def test_static_icon_route(self):
