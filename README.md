@@ -1,6 +1,6 @@
 # Repo Studio
 
-**Evidence-first investigation of existing Git repositories** · Linux + Windows beta 0.9.9 · Local-first · Read-only source inspection · Human-controlled
+**Evidence-first investigation of existing Git repositories** · Linux + Windows beta 0.9.10 · Local-first · Read-only source inspection · Human-controlled
 
 Repo Studio is a local web application for examining committed code in legacy Git repositories and assembling traceable evidence for optional AI-assisted analysis. It does **not** upload repository content to AI services, automatically modify inspected source, or assert that a static finding is a defect.
 
