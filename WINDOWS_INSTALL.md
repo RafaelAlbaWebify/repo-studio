@@ -1,4 +1,4 @@
-# Windows installation (0.9.9 beta candidate — CI validated)
+# Windows installation (0.9.10 beta — CI validated)
 
 **Requirements:** Windows 10/11, Python 3.10+ (`py -3` or `python`), Git for Windows, PowerShell 5.1 or newer, and a browser. No admin rights or Python runtime pip packages required.
 
